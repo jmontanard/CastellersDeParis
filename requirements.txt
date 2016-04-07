@@ -1,5 +1,5 @@
 Babel==2.2.0
-Django==1.8.12
+Django==1.9.5
 django-location-field==1.6.1
 django-phonenumber-field==1.1.0
 django-tastypie==0.13.3
