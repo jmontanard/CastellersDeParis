@@ -41,8 +41,8 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'tastypie',
     'tastypie_swagger',
-    'fortalesa'
-
+    'fortalesa',
+    'autofixture'
 ]
 
 MIDDLEWARE_CLASSES = [
