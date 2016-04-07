@@ -9,12 +9,15 @@ from location_field.models.plain import PlainLocationField
 # Create your models here.
 
 class Casteller(models.Model):
-    name = models.CharField(max_length=50)
-    surname = models.CharField(max_length=50)
-    user = models.ForeignKey(User, blank=True)
-    mail = models.EmailField(blank=True)
+    first_name = models.CharField(max_length=50)
+    family_name = models.CharField(max_length=50)
+    user = models.OneToOneField(User, blank=True)
+    mail = models.EmailField()
     birthday = models.DateField()
     phone = PhoneNumberField(blank=True)
+
+    def __unicode__(self):
+        return "{}, {}".format(self.family_name.strip(), self.first_name.strip())
 
 
 class EventType(models.Model):
