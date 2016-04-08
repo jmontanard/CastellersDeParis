@@ -17,10 +17,11 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from tastypie.api import Api
 from fortalesa.api.resources import CastellerResource
+from django.conf import settings
+from django.conf.urls.static import static
 
 v1_api = Api(api_name='v1')
 v1_api.register(CastellerResource())
-
 
 
 urlpatterns = [
@@ -34,3 +35,4 @@ urlpatterns = [
             "version": "0.1"}
         ),
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
