@@ -11,7 +11,7 @@ from location_field.models.plain import PlainLocationField
 class Casteller(models.Model):
     first_name = models.CharField(max_length=50)
     family_name = models.CharField(max_length=50)
-    user = models.OneToOneField(User, blank=True)
+    user = models.OneToOneField(User,null=True, blank=True)
     mail = models.EmailField()
     birthday = models.DateField()
     phone = PhoneNumberField(blank=True)

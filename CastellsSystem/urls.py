@@ -16,13 +16,13 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from tastypie.api import Api
-from fortalesa.api.resources import CastellerResource
+from fortalesa.api.resources import CastellerResource, CastellerAuthResource
 from django.conf import settings
 from django.conf.urls.static import static
 
 v1_api = Api(api_name='v1')
 v1_api.register(CastellerResource())
-
+v1_api.register(CastellerAuthResource())
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
