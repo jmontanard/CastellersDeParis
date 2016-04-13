@@ -87,6 +87,7 @@ class GroupResource(ModelResource):
     class Meta:
         queryset = Group.objects.all()
         resouce_name = 'group'
+        allowed_methods = ['get']
 
 
 
