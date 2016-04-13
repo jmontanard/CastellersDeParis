@@ -5,6 +5,7 @@ from django.http import HttpResponseBadRequest, HttpResponse, HttpResponseNotFou
 from tastypie import fields
 from tastypie.resources import ModelResource, ALL_WITH_RELATIONS, ALL
 from tastypie.authentication import BasicAuthentication
+from tastypie.authorization import ReadOnlyAuthorization
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -99,7 +100,7 @@ class EventResource(ModelResource):
             "date": ['lte', 'gte'],
             "type": ALL_WITH_RELATIONS,
         }
-        #authorization = authorization.CastellerAuthorization()
+        authorization = authorization.EventAuthorization()
         authentication = BasicAuthentication()
 
 class EventTypeResource(ModelResource):
@@ -109,5 +110,6 @@ class EventTypeResource(ModelResource):
         resource_name = 'event'
         allowed_methods = ['get']
         filter = {'pk': ALL}
-        #authorization = authorization.CastellerAuthorization()
+        authorization = ReadOnlyAuthorization()
         authentication = BasicAuthentication()
+

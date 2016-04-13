@@ -29,6 +29,7 @@ class EventType(models.Model):
 
 class Event(models.Model):
     type = models.ForeignKey(EventType)
+    organizer = models.ForeignKey(User)
     name = models.CharField(max_length=50)
     description = models.TextField(blank=False)
     date = models.DateField()
