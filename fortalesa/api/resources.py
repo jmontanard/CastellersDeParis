@@ -1,9 +1,11 @@
 from fortalesa.models import Casteller, Event, EventType
 from fortalesa.api import authorization
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.http import HttpResponseBadRequest, HttpResponse, HttpResponseNotFound
-from tastypie.resources import ModelResource
+from tastypie import fields
+from tastypie.resources import ModelResource, ALL_WITH_RELATIONS, ALL
 from tastypie.authentication import BasicAuthentication
+from tastypie.authorization import ReadOnlyAuthorization
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -13,7 +15,7 @@ class CastellerResource(ModelResource):
     class Meta:
         queryset = Casteller.objects.all()
         resource_name = 'casteller'
-        allowed_methods = ['get', 'put', 'patch']
+        allowed_methods = ['get', 'patch']
         authorization = authorization.CastellerAuthorization()
         authentication = BasicAuthentication()
 
@@ -72,9 +74,43 @@ class CastellerAuthResource(ModelResource):
 
 
 class UserResource(ModelResource):
+    groups = fields.ToManyField('fortalesa.api.resources.GroupResource', 'groups')
     class Meta:
         queryset = User.objects.all()
-        resource_name = 'auth/user'
+        resource_name = 'user'
         excludes = ['email', 'password', 'is_superuser']
         # Add it here.
         authentication = BasicAuthentication()
+        authorization = authorization.UserAuthorization()
+
+class GroupResource(ModelResource):
+    class Meta:
+        queryset = Group.objects.all()
+        resouce_name = 'group'
+        allowed_methods = ['get']
+
+
+
+class EventResource(ModelResource):
+    event_type = fields.ToOneField('fortalesa.api.resources.EventTypeResource','type')
+    class Meta:
+        queryset = Event.objects.all()
+        resource_name = 'event'
+        allowed_methods = ['get', 'post', 'patch', 'delete']
+        filtering = {
+            "date": ['lte', 'gte'],
+            "type": ALL_WITH_RELATIONS,
+        }
+        authorization = authorization.EventAuthorization()
+        authentication = BasicAuthentication()
+
+class EventTypeResource(ModelResource):
+    events = fields.ToManyField('fortalesa.api.resources.EventResource', 'events')
+    class Meta:
+        queryset = EventType.objects.all()
+        resource_name = 'event'
+        allowed_methods = ['get']
+        filter = {'pk': ALL}
+        authorization = ReadOnlyAuthorization()
+        authentication = BasicAuthentication()
+
