@@ -6,7 +6,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from location_field.models.plain import PlainLocationField
 from tastypie.models import create_api_key
 
-models.signals.post_save.connect(create_api_key, sender=User)
 
 
 # Create your models here.
