@@ -1,6 +1,8 @@
 from fortalesa.models import Casteller, Event, EventType
 from fortalesa.api import authorization
+from fortalesa.api.cors_resource import CORSModelResource
 from django.contrib.auth.models import User, Group
+
 from django.http import HttpResponseBadRequest, HttpResponse, HttpResponseNotFound
 from tastypie import fields
 from tastypie.resources import ModelResource, ALL_WITH_RELATIONS, ALL
@@ -16,9 +18,13 @@ from tastypie.authorization import ReadOnlyAuthorization
 from django.core.mail import send_mail
 from django.conf import settings
 
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
-class CastellerResource(ModelResource):
+class CastellerResource(CORSModelResource):
     class Meta:
         queryset = Casteller.objects.all()
         resource_name = 'casteller'
@@ -27,7 +33,7 @@ class CastellerResource(ModelResource):
         authentication = BasicAuthentication()
 
 
-class CastellerAuthResource(ModelResource):
+class CastellerAuthResource(CORSModelResource):
     class Meta:
         queryset = Casteller.objects.all()
         allowed_methods = ['post']
@@ -79,7 +85,7 @@ class CastellerAuthResource(ModelResource):
                   [mail], fail_silently=False)
 
 
-class UserResource(ModelResource):
+class UserResource(CORSModelResource):
     class Meta:
         queryset = User.objects.all()
         fields = ['first_name', 'last_name', 'email']
@@ -97,22 +103,36 @@ class UserResource(ModelResource):
         ]
 
     def login(self, request, **kwargs):
+        logger.debug('The login method')
+        logger.debug(request.body)
+
         self.method_check(request, allowed=['post'])
         #print 4444; import pdb;pdb.set_trace()
 
         data = self.deserialize(request, request.body, format=request.META.get('CONTENT_TYPE', 'application/json'))
+        logger.debug('The login method')
 
         username = data.get('username', '')
         password = data.get('password', '')
 
         user = authenticate(username=username, password=password)
+
+
         if user:
+            logger.debug("user authenticated")
+
             if user.is_active:
+                logger.debug("user is active")
                 login(request, user)
+                logger.debug("user loged")
 
                 try:
                     key = ApiKey.objects.get(user=user)
+                    logger.debug("user key {}:".format(key))
+
                 except ApiKey.DoesNotExist:
+                    logger.debug("User api key do not exist")
+
                     return self.create_response(
                         request, {
                             'success': False,
@@ -120,6 +140,7 @@ class UserResource(ModelResource):
                         },
                         HttpForbidden,
                     )
+                logger.debug("user Api key returned")
 
                 ret = self.create_response(request, {
                     'success': True,
@@ -129,6 +150,8 @@ class UserResource(ModelResource):
                 #print 5656; import pdb;pdb.set_trace()
                 return ret
             else:
+                logger.debug("user is not active")
+
                 return self.create_response(
                     request, {
                         'success': False,
@@ -137,6 +160,8 @@ class UserResource(ModelResource):
                     HttpForbidden,
                 )
         else:
+            logger.debug("user not authenticated")
+
             return self.create_response(
                 request, {
                     'success': False,
@@ -158,7 +183,7 @@ models.signals.post_save.connect(create_api_key, sender=User)
 
 
 
-class GroupResource(ModelResource):
+class GroupResource(CORSModelResource):
     class Meta:
         queryset = Group.objects.all()
         resouce_name = 'group'
@@ -166,7 +191,7 @@ class GroupResource(ModelResource):
 
 
 
-class EventResource(ModelResource):
+class EventResource(CORSModelResource):
     event_type = fields.ToOneField('fortalesa.api.resources.EventTypeResource','type')
     class Meta:
         queryset = Event.objects.all()
@@ -179,7 +204,7 @@ class EventResource(ModelResource):
         authorization = authorization.EventAuthorization()
         authentication = BasicAuthentication()
 
-class EventTypeResource(ModelResource):
+class EventTypeResource(CORSModelResource):
     events = fields.ToManyField('fortalesa.api.resources.EventResource', 'events')
     class Meta:
         queryset = EventType.objects.all()
